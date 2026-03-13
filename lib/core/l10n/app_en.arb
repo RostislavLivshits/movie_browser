@@ -1,0 +1,18 @@
+{
+  "@@locale": "en",
+  "appTitle": "Movie Browser",
+  "searchHint": "Search movies...",
+  "favorites": "Favorites",
+  "searchHistory": "Search History",
+  "clearAll": "Clear All",
+  "noResults": "No results found",
+  "networkError": "Network connection error",
+  "apiError": "API Error",
+  "cachedDataBanner": "Showing cached data",
+  "remove": "Remove",
+  "plot": "Plot",
+  "genre": "Genre",
+  "director": "Director",
+  "actors": "Actors",
+  "rating": "Rating"
+}
