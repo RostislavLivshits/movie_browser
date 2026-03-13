@@ -41,30 +41,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => MovieSearchBloc(
-            repository: repository,
-            historyBox: Hive.box<String>('search_history'),
+    // Wrap with RepositoryProvider to make repository accessible in new screens
+    return RepositoryProvider.value(
+      value: repository,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => MovieSearchBloc(
+              repository: repository,
+              historyBox: Hive.box<String>('search_history'),
+            ),
           ),
+          BlocProvider(
+            create: (context) => FavoritesBloc(
+              repository: repository,
+            )..add(LoadFavorites()),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          home: const SearchScreen(),
         ),
-        BlocProvider(
-          create: (context) => FavoritesBloc(
-            repository: repository,
-          )..add(LoadFavorites()),
-        ),
-      ],
-      child: MaterialApp(
-        // Connect generated localization delegates
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        home: const SearchScreen(),
       ),
     );
   }
