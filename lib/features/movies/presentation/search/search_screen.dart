@@ -15,6 +15,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -25,6 +26,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -62,6 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search),
@@ -80,9 +83,16 @@ class _SearchScreenState extends State<SearchScreen> {
                 if (state.status == SearchStatus.loading &&
                     state.movies.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state.status == SearchStatus.failure && state.movies.isEmpty) {
+                } else if (state.status == SearchStatus.failure &&
+                    state.movies.isEmpty) {
                   // Show error text ONLY if we don't have any cached/loaded movies
-                  return Center(child: Text(state.errorMessage.isNotEmpty ? state.errorMessage : l10n.apiError));
+                  return Center(
+                    child: Text(
+                      state.errorMessage.isNotEmpty
+                          ? state.errorMessage
+                          : l10n.apiError,
+                    ),
+                  );
                 } else if (state.status == SearchStatus.failure) {
                   return Center(
                     child: Text(
@@ -176,6 +186,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ),
                 onTap: () {
+                  // Update the text field visually
+                  _searchController.text = query;
+                  // Move the cursor to the end of the text
+                  _searchController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: query.length),
+                  );
                   // Re-search directly from history
                   context.read<MovieSearchBloc>().add(
                     SearchQueryChanged(query),
