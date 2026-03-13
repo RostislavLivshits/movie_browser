@@ -67,90 +67,92 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: l10n.searchHint,
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                onChanged: (query) {
+                  context.read<MovieSearchBloc>().add(SearchQueryChanged(query));
+                },
               ),
-              onChanged: (query) {
-                context.read<MovieSearchBloc>().add(SearchQueryChanged(query));
-              },
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<MovieSearchBloc, MovieSearchState>(
-              builder: (context, state) {
-                if (state.status == SearchStatus.loading &&
-                    state.movies.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state.status == SearchStatus.failure &&
-                    state.movies.isEmpty) {
-                  // Show error text ONLY if we don't have any cached/loaded movies
-                  return Center(
-                    child: Text(
-                      state.errorMessage.isNotEmpty
-                          ? state.errorMessage
-                          : l10n.apiError,
-                    ),
-                  );
-                } else if (state.status == SearchStatus.failure) {
-                  return Center(
-                    child: Text(
-                      state.errorMessage.isNotEmpty
-                          ? state.errorMessage
-                          : l10n.apiError,
-                    ),
-                  );
-                } else if (state.status == SearchStatus.success &&
-                    state.movies.isEmpty) {
-                  return Center(child: Text(l10n.noResults));
-                } else if (state.movies.isNotEmpty) {
-                  // Build list with pagination support
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: state.hasReachedMax
-                        ? state.movies.length
-                        : state.movies.length + 1,
-                    itemBuilder: (context, index) {
-                      // Show loading indicator at the bottom
-                      if (index >= state.movies.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-                      final movie = state.movies[index];
-                      return MovieCard(
-                        movie: movie,
-                        onTap: () {
-                          // Navigate to Details Screen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailsScreen(movie: movie),
+            Expanded(
+              child: BlocBuilder<MovieSearchBloc, MovieSearchState>(
+                builder: (context, state) {
+                  if (state.status == SearchStatus.loading &&
+                      state.movies.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.status == SearchStatus.failure &&
+                      state.movies.isEmpty) {
+                    // Show error text ONLY if we don't have any cached/loaded movies
+                    return Center(
+                      child: Text(
+                        state.errorMessage.isNotEmpty
+                            ? state.errorMessage
+                            : l10n.apiError,
+                      ),
+                    );
+                  } else if (state.status == SearchStatus.failure) {
+                    return Center(
+                      child: Text(
+                        state.errorMessage.isNotEmpty
+                            ? state.errorMessage
+                            : l10n.apiError,
+                      ),
+                    );
+                  } else if (state.status == SearchStatus.success &&
+                      state.movies.isEmpty) {
+                    return Center(child: Text(l10n.noResults));
+                  } else if (state.movies.isNotEmpty) {
+                    // Build list with pagination support
+                    return ListView.builder(
+                      controller: _scrollController,
+                      itemCount: state.hasReachedMax
+                          ? state.movies.length
+                          : state.movies.length + 1,
+                      itemBuilder: (context, index) {
+                        // Show loading indicator at the bottom
+                        if (index >= state.movies.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(),
                             ),
                           );
-                        },
-                      );
-                    },
-                  );
-                } else {
-                  return _buildHistory(context, state, l10n);
-                }
-              },
+                        }
+                        final movie = state.movies[index];
+                        return MovieCard(
+                          movie: movie,
+                          onTap: () {
+                            // Navigate to Details Screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailsScreen(movie: movie),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  } else {
+                    return _buildHistory(context, state, l10n);
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

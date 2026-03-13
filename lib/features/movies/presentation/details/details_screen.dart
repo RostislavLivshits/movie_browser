@@ -59,98 +59,100 @@ class _DetailsView extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<MovieDetailsBloc, MovieDetailsState>(
-        builder: (context, state) {
-          if (state.status == MovieDetailsStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state.status == MovieDetailsStatus.failure) {
-            return Center(
-              child: Text(
-                state.errorMessage.isNotEmpty
-                    ? state.errorMessage
-                    : l10n.apiError,
-              ),
-            );
-          } else if (state.status == MovieDetailsStatus.success &&
-              state.details != null) {
-            final details = state.details!;
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Offline cache banner requirement
-                  if (state.isFromCache)
-                    Container(
-                      width: double.infinity,
-                      color: Colors.orangeAccent,
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        l10n.cachedDataBanner,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  // Movie Poster
-                  if (details.poster != 'N/A' && details.poster.isNotEmpty)
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            details.poster,
-                            height: 300,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                const Icon(Icons.broken_image, size: 100),
-                          ),
-                        ),
-                      ),
-                    ),
-                  // Movie Details Data
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${details.title} (${details.year})',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${l10n.rating}: ${details.imdbRating}',
+      body: SafeArea(
+        child: BlocBuilder<MovieDetailsBloc, MovieDetailsState>(
+          builder: (context, state) {
+            if (state.status == MovieDetailsStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state.status == MovieDetailsStatus.failure) {
+              return Center(
+                child: Text(
+                  state.errorMessage.isNotEmpty
+                      ? state.errorMessage
+                      : l10n.apiError,
+                ),
+              );
+            } else if (state.status == MovieDetailsStatus.success &&
+                state.details != null) {
+              final details = state.details!;
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Offline cache banner requirement
+                    if (state.isFromCache)
+                      Container(
+                        width: double.infinity,
+                        color: Colors.orangeAccent,
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          l10n.cachedDataBanner,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 16),
-                        Text('${l10n.genre}: ${details.genre}'),
-                        const SizedBox(height: 8),
-                        Text('${l10n.director}: ${details.director}'),
-                        const SizedBox(height: 8),
-                        Text('${l10n.actors}: ${details.actors}'),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.plot,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                      ),
+                    // Movie Poster
+                    if (details.poster != 'N/A' && details.poster.isNotEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              details.poster,
+                              height: 300,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.broken_image, size: 100),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          details.plot,
-                          style: const TextStyle(fontSize: 16, height: 1.4),
-                        ),
-                      ],
+                      ),
+                    // Movie Details Data
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${details.title} (${details.year})',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${l10n.rating}: ${details.imdbRating}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 16),
+                          Text('${l10n.genre}: ${details.genre}'),
+                          const SizedBox(height: 8),
+                          Text('${l10n.director}: ${details.director}'),
+                          const SizedBox(height: 8),
+                          Text('${l10n.actors}: ${details.actors}'),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.plot,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            details.plot,
+                            style: const TextStyle(fontSize: 16, height: 1.4),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return const SizedBox();
-        },
+                  ],
+                ),
+              );
+            }
+            return const SizedBox();
+          },
+        ),
       ),
     );
   }
