@@ -1,12 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movie_browser/core/l10n/app_localizations.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import 'bloc/movie_search_bloc.dart';
 import 'bloc/movie_search_event.dart';
 import 'bloc/movie_search_state.dart';
+import 'widgets/movie_card.dart';
 
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
+
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<MovieSearchBloc>().add(LoadNextPage());
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9); // Load more when 90% scrolled
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +54,7 @@ class SearchScreen extends StatelessWidget {
             onPressed: () {
               // TODO: Navigate to Favorites Screen
             },
-          )
+          ),
         ],
       ),
       body: Column(
@@ -32,10 +65,11 @@ class SearchScreen extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onChanged: (query) {
-                // Trigger debounced search
                 context.read<MovieSearchBloc>().add(SearchQueryChanged(query));
               },
             ),
@@ -43,27 +77,50 @@ class SearchScreen extends StatelessWidget {
           Expanded(
             child: BlocBuilder<MovieSearchBloc, MovieSearchState>(
               builder: (context, state) {
-                if (state.status == SearchStatus.loading && state.movies.isEmpty) {
+                if (state.status == SearchStatus.loading &&
+                    state.movies.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state.status == SearchStatus.failure) {
+                } else if (state.status == SearchStatus.failure && state.movies.isEmpty) {
+                  // Show error text ONLY if we don't have any cached/loaded movies
                   return Center(child: Text(state.errorMessage.isNotEmpty ? state.errorMessage : l10n.apiError));
-                } else if (state.status == SearchStatus.success && state.movies.isEmpty) {
+                } else if (state.status == SearchStatus.failure) {
+                  return Center(
+                    child: Text(
+                      state.errorMessage.isNotEmpty
+                          ? state.errorMessage
+                          : l10n.apiError,
+                    ),
+                  );
+                } else if (state.status == SearchStatus.success &&
+                    state.movies.isEmpty) {
                   return Center(child: Text(l10n.noResults));
                 } else if (state.movies.isNotEmpty) {
-                  // Basic list representation. We will add pagination and cards later.
+                  // Build list with pagination support
                   return ListView.builder(
-                    itemCount: state.movies.length,
+                    controller: _scrollController,
+                    itemCount: state.hasReachedMax
+                        ? state.movies.length
+                        : state.movies.length + 1,
                     itemBuilder: (context, index) {
+                      // Show loading indicator at the bottom
+                      if (index >= state.movies.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
                       final movie = state.movies[index];
-                      return ListTile(
-                        title: Text(movie.title),
-                        subtitle: Text(movie.year),
-                        leading: const Icon(Icons.movie),
+                      return MovieCard(
+                        movie: movie,
+                        onTap: () {
+                          // TODO: Navigate to Details Screen
+                        },
                       );
                     },
                   );
                 } else {
-                  // Initial state: show search history
                   return _buildHistory(context, state, l10n);
                 }
               },
@@ -74,7 +131,11 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHistory(BuildContext context, MovieSearchState state, AppLocalizations l10n) {
+  Widget _buildHistory(
+    BuildContext context,
+    MovieSearchState state,
+    AppLocalizations l10n,
+  ) {
     if (state.searchHistory.isEmpty) return const SizedBox();
 
     return Column(
@@ -87,10 +148,14 @@ class SearchScreen extends StatelessWidget {
             children: [
               Text(
                 l10n.searchHistory,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               TextButton(
-                onPressed: () => context.read<MovieSearchBloc>().add(ClearHistory()),
+                onPressed: () =>
+                    context.read<MovieSearchBloc>().add(ClearHistory()),
                 child: Text(l10n.clearAll),
               ),
             ],
@@ -106,11 +171,15 @@ class SearchScreen extends StatelessWidget {
                 title: Text(query),
                 trailing: IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () => context.read<MovieSearchBloc>().add(RemoveHistoryItem(query)),
+                  onPressed: () => context.read<MovieSearchBloc>().add(
+                    RemoveHistoryItem(query),
+                  ),
                 ),
                 onTap: () {
-                  // Optional UX improvement: trigger search from history tap
-                  context.read<MovieSearchBloc>().add(SearchQueryChanged(query));
+                  // Re-search directly from history
+                  context.read<MovieSearchBloc>().add(
+                    SearchQueryChanged(query),
+                  );
                 },
               );
             },

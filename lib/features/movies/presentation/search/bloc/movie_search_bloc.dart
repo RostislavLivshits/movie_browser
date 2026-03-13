@@ -106,12 +106,18 @@ class MovieSearchBloc extends Bloc<MovieSearchEvent, MovieSearchState> {
         );
       }
     } catch (e) {
-      emit(
-        state.copyWith(
-          status: SearchStatus.failure,
-          errorMessage: e.toString(),
-        ),
-      );
+      // OMDb API returns "Movie not found!" when requested page exceeds total results
+      if (e.toString().contains('Movie not found')) {
+        emit(state.copyWith(hasReachedMax: true));
+      } else {
+        // Emit failure only if it's a real network/API issue
+        emit(
+          state.copyWith(
+            status: SearchStatus.failure,
+            errorMessage: e.toString(),
+          ),
+        );
+      }
     }
   }
 
