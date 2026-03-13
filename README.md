@@ -39,9 +39,3 @@ Run the app with your OMDb API key:
 ```bash
 flutter run --dart-define=OMDB_API_KEY=your_api_key_here
 ```
-### 🔮 Future Improvements
-If given more time, the following enhancements could be implemented:
-Image Caching: Implement cached_network_image for better offline visual experience.
-Connectivity Detection: Proactively show network status using the connectivity_plus package.
-Automated Testing: Add comprehensive unit tests for BLoCs and Repositories, as well as integration tests.
-Accessibility: Improve semantics and support for large text scaling.
