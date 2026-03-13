@@ -1,0 +1,1 @@
+const apiKey = String.fromEnvironment('OMDB_API_KEY');
