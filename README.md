@@ -37,7 +37,7 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
 ```bash
 flutter gen-l10n
 ```
-`
+
 Run the app with your OMDb API key:
 ```bash
 flutter run --dart-define=OMDB_API_KEY=your_api_key_here
