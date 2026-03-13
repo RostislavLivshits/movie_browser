@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/app_localizations.dart';
 import '../details/details_screen.dart';
+import '../favorites/favorites_screen.dart';
 import 'bloc/movie_search_bloc.dart';
 import 'bloc/movie_search_event.dart';
 import 'bloc/movie_search_state.dart';
@@ -55,7 +56,13 @@ class _SearchScreenState extends State<SearchScreen> {
           IconButton(
             icon: const Icon(Icons.favorite),
             onPressed: () {
-              // TODO: Navigate to Favorites Screen
+              // Navigate to Favorites Screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FavoritesScreen(),
+                ),
+              );
             },
           ),
         ],
