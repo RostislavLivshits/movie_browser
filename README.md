@@ -34,8 +34,27 @@ Generate Hive adapters and Localization files:
 ```bash
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
+```bash
 flutter gen-l10n
+```
+`
 Run the app with your OMDb API key:
 ```bash
 flutter run --dart-define=OMDB_API_KEY=your_api_key_here
 ```
+## 🧪 Testing
+The project includes meaningful unit tests focusing on the core business logic, such as offline fallback caching in the Repository and state transitions in the BLoCs.
+
+To run the tests, execute the following command:
+```bash
+flutter test
+```
+
+## 🔮 Future Improvements (What was not implemented and why)
+
+As per the assignment guidelines, the focus was placed on core architecture, state management, and stability. Some non-critical features were intentionally left out to avoid over-engineering, but would be implemented in a real-world scenario:
+
+* **Image Caching:** Currently, network images fail gracefully with a fallback icon. Implementing a package like `cached_network_image` would provide a much better offline visual experience.
+* **Connectivity Detection:** The app relies on Dio error throwing to detect network issues. Adding the `connectivity_plus` package would allow the app to proactively react to network state changes.
+* **Automated Testing:** While core BLoCs and Repositories are unit-tested, the coverage could be expanded with UI/Widget tests and Integration tests.
+* **Accessibility:** Improving semantics and ensuring proper support for large text scaling to meet high accessibility standards.
